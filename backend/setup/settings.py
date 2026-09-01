@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,17 +95,31 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # ========================
+# 🔥 JWT (LOGIN FUNCIONANDO)
+# ========================
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# ========================
 # 🔥 CORS (REACT)
 # ========================
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = False # Mude para False para permitir credenciais
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React antigo / CRA
+    "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:5173",  # React Novo / Vite (Faltava este!)
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:1025",  # A própria porta do Apache
+    "http://localhost:1025",
     "http://127.0.0.1:1025",
 ]
 

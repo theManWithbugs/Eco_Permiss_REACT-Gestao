@@ -187,3 +187,53 @@ def gestao_ugais(request):
 
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#
+
+# Informações dos membros da equipe de pesquisa
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def info_membro_pesq(request):
+    """
+    Aqui vai ser realizado a busca de todos os dados de cada membro
+    atualmente incluso na solicitação de pesquisa
+    """
+
+    class SerializerAnexosMembrPesq(serializers.ModelSerializer):
+        class Meta:
+            model = AnexoMembroEquipe
+            fields = [
+                'id',
+                'nome_original',
+                'upado_em',
+                'doc_ident',
+                'doc_cpf',
+                'doc_seg_vida',
+                'doc_cart_vacin',
+                'licenca',
+                'outros'
+            ]
+
+    class SerializerMembrosPesq(serializers.ModelSerializer):
+        """
+        Serializa membros da equipe para listagem.
+        """
+        anexos = SerializerAnexosMembrPesq(many=True, read_only=True)
+
+        class Meta:
+            model = MembroEquipePesq
+            fields = '__all__'
+
+    id_pesq = request.data.get('id_public')
+    pesquisa = get_object_or_404(DadosSolicPesquisa, id_public=id_pesq)
+
+    membros = MembroEquipePesq.objects.filter(
+        pesquisa=pesquisa
+        ).prefetch_related("anexos")
+
+
+    serializer = SerializerMembrosPesq(membros, many=True)
+
+    return Response(serializer.data, status=200)
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
