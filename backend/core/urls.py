@@ -17,8 +17,6 @@ urlpatterns = [
   path('pesq_solicitadas/', pesquisas_solicitadas),
   path('info_pesq/', info_pesquisa),
   path('info_membros_pesq/', info_membro_pesq),
-
-  path('decidir_pesq/', decidir_pesq),
   #--------------------------------------#
   #--------------------------------------#
 
@@ -28,9 +26,14 @@ urlpatterns = [
   path('ugais_solics/', ugais_solicitadas),
   path('info_ugai/', info_ugai),
 
-  path('decidir_ugai/', decidir_ugai),
+  path('gestao_ugais/', gestao_ugais),
+  #--------------------------------------#
+  #--------------------------------------#
 
-  path('gestao_ugais/', gestao_ugais)
+  # ALTERAR STATUS DA SOLIC
+  #--------------------------------------#
+  #--------------------------------------#
+  path('atualizar_status/', alterar_status_solic)
   #--------------------------------------#
   #--------------------------------------#
 ]

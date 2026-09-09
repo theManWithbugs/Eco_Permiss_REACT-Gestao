@@ -12,6 +12,11 @@ from datetime import date
 from .models import *
 from .serializers import *
 
+STATUS_MAP = {
+    "APROVAR": "APROVADO",
+    "RECUSAR": "INDEFERIDO",
+}
+
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#
 @api_view(['GET'])
@@ -108,53 +113,47 @@ def info_ugai(request):
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#
 
-# São quase iguais!, apenas coloque uma variavel de controle
+# Alterar status da solicitação
 #------------------------------------------------------------------------------------------#
 #------------------------------------------------------------------------------------------#
+# Função auxiliar
+def atualizar_status_solicitacao(tipo_solic, acao, id_public):
+    if tipo_solic == "PESQ":
+        obj = get_object_or_404(DadosSolicPesquisa, id_public=id_public)
+    elif tipo_solic == "UGAI":
+        obj = get_object_or_404(DadosSolicUgai, id_public=id_public)
+    else:
+        raise ValueError("Tipo de solicitação inválido")
+
+    if obj.status != 'PENDENTE':
+        raise ValueError("Apenas solicitações pendentes podem ser alteradas.")
+
+    novo_status = STATUS_MAP.get(acao)
+    if not novo_status:
+        raise ValueError("Ação inválida")
+
+    obj.status = novo_status
+    obj.save(update_fields=["status"])
+    return obj
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def decidir_pesq(request):
+def alterar_status_solic(request):
+    tipo_solic = request.data.get('tipo_solic')
     acao = request.data.get('acao')
     id_public = request.data.get('id_public')
 
-    obj = get_object_or_404(DadosSolicPesquisa, id_public=id_public)
+    try:
+        obj = atualizar_status_solicitacao(tipo_solic, acao, id_public)
+        return Response(
+            {"message": "Ação realizada com sucesso!", "status": obj.status},
+            status=200
+        )
+    except ValueError as e:
+        return Response({"message": str(e)}, status=400)
 
-    if obj.status != 'PENDENTE':
-        Response({"message": "Apenas pesquisas pendentes podem ser alteradas!"}, status=401)
-
-    if acao == 'APROVAR':
-        obj.status = 'APROVADO'
-    elif acao == 'RECUSAR':
-        obj.status = 'INDEFERIDO'
-    else:
-        return Response({"message": "Ação inválida."}, status=400)
-
-    obj.save(update_fields=['status'])
-
-    return Response({"message": "Ação realizada com sucesso!", "status": obj.status}, status=200)
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def decidir_ugai(request):
-    acao = request.data.get('acao')
-    id_public = request.data.get('id_public')
-
-    obj = get_object_or_404(DadosSolicUgai, id_public=id_public)
-
-    if obj.status != 'PENDENTE':
-        Response({"message": "Apenas solicitações pendentes podem ser alteradas!"}, status=401)
-
-    if acao == 'APROVAR':
-        obj.status = 'APROVADO'
-    elif acao == 'RECUSAR':
-        obj.status = 'INDEFERIDO'
-    else:
-        return Response({"message": "Ação inválida."}, status=400)
-
-    obj.save(update_fields=['status'])
-
-    return Response({"message": "Ação realizada com sucesso!", "status": obj.status}, status=200)
-
+#------------------------------------------------------------------------------------------#
+#------------------------------------------------------------------------------------------#
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
