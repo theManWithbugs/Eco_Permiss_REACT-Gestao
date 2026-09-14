@@ -37,3 +37,9 @@ class SerializerMembrosUgai(serializers.ModelSerializer):
     class Meta:
         model = MembroEquipeUGAI
         exclude = ['solicitacao_ref']
+
+# -------------------------------------------------------
+class SerializerDoc(serializers.ModelSerializer):
+    class Meta:
+        model = ArquivosRelFinal
+        fields = "__all__"

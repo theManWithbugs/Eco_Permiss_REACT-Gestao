@@ -17,6 +17,8 @@ urlpatterns = [
   path('pesq_solicitadas/', pesquisas_solicitadas),
   path('info_pesq/', info_pesquisa),
   path('info_membros_pesq/', info_membro_pesq),
+
+  path('rel_final_pesq/', get_rel_pesq),
   #--------------------------------------#
   #--------------------------------------#
 

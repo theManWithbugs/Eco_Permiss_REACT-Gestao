@@ -51,8 +51,6 @@ def ugais_solicitadas(request):
     objs = DadosSolicUgai.objects.filter(
         status=status_solic).select_related('ugai').order_by('-data_solicitacao')
 
-    print(objs)
-
     page_number = request.GET.get('page', 1)
     paginator = Paginator(objs, 10)
     page_obj = paginator.get_page(page_number)
@@ -89,6 +87,27 @@ def info_pesquisa(request):
     )
 
     return Response(serializer.data, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def get_rel_pesq(request):
+    """
+    Retorna os documentos finais associados a uma pesquisa.
+    Atenção: espera o campo 'id_pesq' no body.
+    """
+    id_pesquisa = request.data.get('id_pesq')
+    pesquisa = get_object_or_404(DadosSolicPesquisa, id_public=id_pesquisa)
+
+    if not id_pesquisa:
+        return Response("Error: O item solicitado não foi localizado!", status=404)
+    try:
+        objs = ArquivosRelFinal.objects.filter(pesquisa_ref=pesquisa)
+        print(objs)
+        serializer = SerializerDoc(objs, many=True, context={'request': request})
+        return Response(serializer.data, status=200)
+    except Exception as e:
+        # ATENÇÃO: Logar exceções em produção
+        return Response(f"Ocorreu um erro: {e}", status=500)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
